@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+.hide-number-arrows::-webkit-outer-spin-button,
+.hide-number-arrows::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.hide-number-arrows {
+  -moz-appearance: textfield;
+}
+
 @theme {
   --color-brand-dark: #05171e;
   --color-brand-surface: #061e26;

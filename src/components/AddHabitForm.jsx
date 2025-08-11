@@ -1,84 +1,107 @@
 import { useState } from "react";
+import NumberInput from "./NumberInput";
 
 function AddHabitForm({ onAddHabit }) {
-  const [habitName, sethabitName] = useState("");
+  // initialize states
+  const [name, setName] = useState("");
   const [goal, setGoal] = useState(1);
   const [unit, setUnit] = useState("");
+  const [difficulty, setDifficulty] = useState("Medium");
 
   const handleSubmit = (e) => {
+    // prevents Browser from reloading page on submit
     e.preventDefault();
-
-    if (!habitName || goal <= 0) {
+    // checks if input is valid
+    if (!name || goal <= 0) {
       alert("Please enter a valid name and a goal greater than 0.");
       return;
     }
-
-    onAddHabit({ name: habitName, goal: Number(goal), unit });
-
-    sethabitName("");
+    onAddHabit({ name, goal: Number(goal), unit, difficulty });
+    // reset to standard
+    setName("");
     setGoal(1);
     setUnit("");
+    setDifficulty("Medium");
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="mb-8 p-4 bg-slate-800 rounded-lg flex items-end gap-4"
-    >
-      <div className="flex-grow">
-        <label
-          htmlFor="habit-name"
-          className="block text-sm font-medium text-gray-400 ml-0.5"
-        >
-          Habit Name
-        </label>
-        <input
-          id="habit-name"
-          type="text"
-          value={habitName}
-          onChange={(e) => sethabitName(e.target.value)}
-          placeholder="Enter name..."
-          className="w-full p-2 bg-slate-700 rounded-md mt-1"
-        />
-      </div>
-      <div className="w-20">
-        <label
-          htmlFor="habit-goal"
-          className="block text-sm font-medium text-gray-400 ml-0.5"
-        >
-          Goal
-        </label>
-        <input
-          id="habit-goal"
-          type="text"
-          value={goal}
-          onChange={(e) => setGoal(e.target.value)}
-          className="w-full p-2 bg-slate-700 rounded-md mt-1"
-        />
-      </div>
-      <div className="w-32">
-        <label
-          htmlFor="habit-unit"
-          className="block text-sm font-medium text-gray-400 ml-0.5"
-        >
-          Unit
-        </label>
-        <input
-          id="habit-unit"
-          type="text"
-          value={unit}
-          onChange={(e) => setUnit(e.target.value)}
-          placeholder="Enter unit..."
-          className="w-full p-2 bg-slate-700 rounded-md mt-1"
-        />
-      </div>
-      <button
-        type="submit"
-        className="px-3 py-2 bg-sky-600 hover:bg-sky-500 rounded-md font-semibold"
+    <div className="mb-8 p-4 bg-brand-surface rounded-lg border border-cyan-500/20 max-w-4xl mx-auto">
+      <h2 className="font-orbitron text-base font-semibold mb-2 text-brand-text-bright">
+        Add New Habit
+      </h2>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col md:flex-row items-end gap-4"
       >
-        Add Habit
-      </button>
-    </form>
+        <div className="w-full md:w-72">
+          <label
+            htmlFor="habit-name"
+            className="block text-sm font-medium text-brand-text-dim"
+          >
+            Name
+          </label>
+          <input
+            id="habit-name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter here..."
+            autoComplete="off"
+            className="w-full mt-1 p-2 bg-slate-700 rounded-md border border-slate-600 focus:border-brand-accent focus:ring-brand-accent"
+          />
+        </div>
+        <div className="w-full md:w-32">
+          <label
+            htmlFor="habit-goal"
+            className="block text-sm font-medium text-brand-text-dim"
+          >
+            Goal
+          </label>
+          <NumberInput value={goal} onChange={(e) => setGoal(e.target.value)} />
+        </div>
+        <div className="w-full md:w-40">
+          <label
+            htmlFor="habit-unit"
+            className="block text-sm font-medium text-brand-text-dim"
+          >
+            Unit
+          </label>
+          <input
+            id="habit-unit"
+            type="text"
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+            placeholder="Enter here..."
+            autoComplete="off"
+            className="w-full mt-1 p-2 bg-slate-700 rounded-md border border-slate-600 focus:border-brand-accent focus:ring-brand-accent"
+          />
+        </div>
+        <div className="w-full md:w-40">
+          <label
+            htmlFor="habit-difficulty"
+            className="block text-sm font-medium text-brand-text-dim"
+          >
+            Difficulty
+          </label>
+          <select
+            id="habit-difficulty"
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+            className="w-full mt-1 p-2 bg-slate-700 rounded-md border border-slate-600 focus:border-brand-accent focus:ring-brand-accent"
+          >
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Hard</option>
+          </select>
+        </div>
+        <button
+          type="submit"
+          className="w-full flex-grow md:w-auto px-4 py-2 bg-brand-accent hover:opacity-80 rounded-md font-semibold text-slate-900"
+        >
+          Add
+        </button>
+      </form>
+    </div>
   );
 }
 

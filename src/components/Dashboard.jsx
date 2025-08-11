@@ -1,35 +1,21 @@
 import { useState, useEffect } from "react";
-import { initialHabits } from "../data.js";
 import HabitList from "./HabitList";
 import AddHabitForm from "./AddHabitForm";
 import ProgressTracker from "./ProgressTracker";
-import { wasCompletedToday } from "../utils.js";
-
-const XP_MAP = { Easy: 25, Medium: 75, Hard: 150 };
-
-function levelUpCheck(user) {
-  if (user.currentXp < user.xpToNextLevel) return user;
-  const excessXp = user.currentXp - user.xpToNextLevel;
-  const newLevel = user.level + 1;
-  const newXpToNextLevel = Math.floor(user.xpToNextLevel * 1.2);
-  console.log(`🎉 LEVEL UP! You are now Level ${newLevel}!`);
-  return {
-    ...user,
-    level: newLevel,
-    currentXp: excessXp,
-    xpToNextLevel: newXpToNextLevel,
-  };
-}
+import { levelUpCheck, XP_MAP } from "../xpLogic.js";
 
 function Dashboard({ user, setUser }) {
+  // Initialize habits from localStorage or empty array
   const [habits, setHabits] = useState(
-    () => JSON.parse(localStorage.getItem("habits_data_v2")) || initialHabits
+    () => JSON.parse(localStorage.getItem("habits_data_v2")) || []
   );
 
+  // Save habits to localStorage
   useEffect(() => {
     localStorage.setItem("habits_data_v2", JSON.stringify(habits));
   }, [habits]);
 
+  // Adds new habit to list
   const addHabit = (newHabitData) => {
     const newHabit = {
       ...newHabitData,
@@ -40,9 +26,11 @@ function Dashboard({ user, setUser }) {
     setHabits([...habits, newHabit]);
   };
 
+  // Deletes habit from list
   const deleteHabit = (habitId) =>
     setHabits(habits.filter((h) => h.id !== habitId));
 
+  // Decrements habit count
   const handleDecrement = (habitId) => {
     setHabits(
       habits.map((habit) => {
@@ -54,43 +42,44 @@ function Dashboard({ user, setUser }) {
     );
   };
 
+  // Increments habit count
   const handleIncrement = (habitId) => {
-    let userHasChanged = false;
-    let updatedUser = { ...user };
+    const today = new Date().toDateString();
+    let habitJustCompleted = null;
 
     const updatedHabits = habits.map((habit) => {
       if (habit.id === habitId && habit.count < habit.goal) {
         const newCount = habit.count + 1;
-        const wasJustCompleted = newCount >= habit.goal;
-
-        if (
-          wasJustCompleted &&
-          !wasCompletedToday(habit.completedOn[habit.completedOn.length - 1])
-        ) {
-          userHasChanged = true;
-          updatedUser.currentXp += XP_MAP[habit.difficulty] || 0;
-          const today = new Date().toDateString();
+        // Check if habit is being completed and for the first time today
+        if (newCount >= habit.goal && !habit.completedOn.includes(today)) {
+          habitJustCompleted = habit;
           return {
             ...habit,
             count: newCount,
             completedOn: [...habit.completedOn, today],
           };
         }
-
         return { ...habit, count: newCount };
       }
       return habit;
     });
 
-    if (userHasChanged) {
+    setHabits(updatedHabits);
+
+    // If a habit was completed award XP and check for a level up
+    if (habitJustCompleted) {
+      let updatedUser = {
+        ...user,
+        currentXp:
+          user.currentXp + (XP_MAP[habitJustCompleted.difficulty] || 0),
+      };
       updatedUser = levelUpCheck(updatedUser);
       setUser(updatedUser);
     }
-    setHabits(updatedHabits);
   };
 
   return (
-    <main className="max-w-3xl mx-auto px-4">
+    <main className="max-w-5xl mx-auto px-6">
       <ProgressTracker habits={habits} />
       <AddHabitForm onAddHabit={addHabit} />
       <HabitList
